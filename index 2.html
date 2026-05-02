@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夜スキンケア記録</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Syne:wght@400;500;600;700&family=DM+Mono:wght@300;400&display=swap');
+
+:root {
+  --bg: #080810;
+  --surface: #0f0f1c;
+  --surface2: #171728;
+  --surface3: #1e1e32;
+  --ink: #e2dff5;
+  --ink2: #a09dc0;
+  --muted: #5a5878;
+  --border: #232238;
+  --border2: #2e2c48;
+  --accent: #8b7cf0;
+  --accent2: #b8a0ff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+  position: relative;
+}
+
+/* ── atmospheric bg ── */
+.bg-glow {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(100,80,200,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 90% 80%, rgba(40,60,140,0.1) 0%, transparent 60%);
+}
+
+/* ── layout ── */
+.app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 1rem 6rem; }
+
+/* ── header ── */
+header {
+  padding: 2rem 0 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.header-left {}
+.header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.header-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+/* ── buttons ── */
+.btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--ink2);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent2); }
+.btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.btn-icon { padding: 6px 10px; font-size: 0.85rem; }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+.btn-primary:hover { background: var(--accent2); border-color: var(--accent2); color: white; }
+.btn-danger { color: #e08080; border-color: #503040; background: #200c18; }
+.btn-danger:hover { border-color: #e08080; }
+
+/* ── nav tabs ── */
+.nav {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-tab {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--ink2); }
+.nav-tab.active { color: var(--accent2); border-bottom-color: var(--accent); }
+
+/* ── view toggle ── */
+.view-toggle { display: flex; gap: 0.25rem; }
+
+/* ── section ── */
+.section { display: none; }
+.section.visible { display: block; }
+
+/* ══════════════════════════
+   CALENDAR
+══════════════════════════ */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+.cal-nav-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--ink2);
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.cal-nav-btn:hover { border-color: var(--accent); color: var(--accent2); }
+.cal-month-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Month grid */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.month-dow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 6px 0;
+  letter-spacing: 0.05em;
+}
+.month-dow.sun { color: #b06060; }
+.month-dow.sat { color: #6070b0; }
+
+.month-day {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 2px 2px;
+  min-height: 52px;
+  position: relative;
+  overflow: hidden;
+}
+.month-day:hover { border-color: var(--border2); background: var(--surface2); }
+.month-day.other-month { opacity: 0.25; }
+.month-day.today .day-num { color: var(--accent2); font-weight: 600; }
+.month-day.today { border-color: var(--accent); }
+.month-day.has-log { background: var(--surface2); }
+
+.day-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink2);
+  line-height: 1;
+}
+.day-dot-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.day-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.day-color-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 0 0 8px 8px;
+}
+
+/* Week grid */
+.week-grid {
+  display: grid;
+  grid-template-columns: 48px repeat(7, 1fr);
+  gap: 3px;
+}
+.week-time-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 40px;
+}
+.week-time-slot {
+  height: 60px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-right: 8px;
+  padding-top: 2px;
+}
+.week-day-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.week-day-header {
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 6px;
+  background: var(--surface);
+}
+.week-dow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+.week-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink2);
+  font-weight: 400;
+}
+.week-day-col.today .week-day-header { border: 1px solid var(--accent); }
+.week-day-col.today .week-date { color: var(--accent2); }
+
+.week-cell {
+  height: 60px;
+  border-radius: 5px;
+  background: var(--surface);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.week-cell:hover { border-color: var(--border2); }
+.week-cell.has-log { border-color: transparent; }
+.week-cell-inner {
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px;
+}
+.week-cell-label {
+  font-size: 0.55rem;
+  text-align: center;
+  line-height: 1.2;
+  font-weight: 500;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+/* ══════════════════════════
+   LOG MODAL / PANEL
+══════════════════════════ */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(4,4,12,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(80,60,180,0.1);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+.modal-date {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.modal-close {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { color: var(--ink); border-color: var(--muted); }
+
+.modal-section { margin-bottom: 1.2rem; }
+.modal-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* routine chips */
+.routine-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.routine-chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  background: var(--surface2);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 500;
+  transition: all 0.15s;
+  color: var(--ink2);
+}
+.routine-chip:hover { opacity: 0.85; }
+.routine-chip.selected { color: white; }
+
+/* memo */
+.memo-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--ink);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.8rem;
+  padding: 10px 12px;
+  resize: none;
+  height: 80px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.memo-input::placeholder { color: var(--muted); }
+.memo-input:focus { border-color: var(--accent); }
+
+.modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+/* log entry display inside modal */
+.log-display {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.log-color-pill {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.log-info { flex: 1; }
+.log-routine-name { font-size: 0.8rem; font-weight: 500; }
+.log-memo { font-size: 0.7rem; color: var(--ink2); margin-top: 3px; line-height: 1.4; }
+.log-delete { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.8rem; padding: 2px; transition: color 0.2s; }
+.log-delete:hover { color: #e08080; }
+
+/* ══════════════════════════
+   ROUTINES SECTION
+══════════════════════════ */
+.routines-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.routine-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.routine-card:hover { border-color: var(--border2); }
+.routine-card-accent {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.routine-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 0.75rem 1.2rem;
+}
+.routine-color-swatch {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.12);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.routine-color-swatch:hover { transform: scale(1.2); }
+.routine-name-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  outline: none;
+  padding: 3px 6px;
+  border-radius: 5px;
+  transition: background 0.2s;
+}
+.routine-name-input:focus { background: var(--surface2); }
+.routine-card-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 1rem 0 1.2rem;
+}
+.routine-steps-area {
+  padding: 0.65rem 1rem 0.85rem 1.2rem;
+}
+.steps-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.55rem;
+}
+.steps-visual {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.6rem;
+  min-height: 28px;
+}
+.step-pill {
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif;
+  border: 1.5px solid;
+  white-space: nowrap;
+}
+.step-arrow-icon {
+  font-size: 0.65rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.steps-empty {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.routine-steps-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--ink2);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  outline: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+.routine-steps-input::placeholder { color: var(--muted); }
+.routine-steps-input:focus { border-color: var(--accent); }
+.routine-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0.8rem 0.75rem;
+}
+.routine-row-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+.add-routine-row {
+  display: flex; gap: 0.5rem; align-items: center;
+  padding-top: 0.25rem;
+}
+
+/* color picker popup */
+.color-picker-popup {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: none;
+}
+.color-picker-popup.open { display: grid; }
+.color-option {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.color-option:hover { transform: scale(1.15); }
+.color-option.selected { border-color: white; }
+
+/* ══════════════════════════
+   STATS SECTION
+══════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.routine-bar-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.routine-bar-row { display: flex; align-items: center; gap: 0.6rem; }
+.routine-bar-label { font-size: 0.75rem; min-width: 100px; color: var(--ink2); }
+.routine-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.routine-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.routine-bar-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ── responsive ── */
+@media (max-width: 500px) {
+  .week-grid { grid-template-columns: 36px repeat(7, 1fr); }
+  .month-day { min-height: 40px; padding: 3px 1px 1px; }
+  .day-dot { width: 6px; height: 6px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="app">
+  <header>
+    <div class="header-left">
+      <div class="header-title">🌙 夜スキンケア記録</div>
+      <div class="header-sub">Night Skincare Journal</div>
+    </div>
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button class="btn active" id="btn-month" onclick="setView('month')">月</button>
+        <button class="btn" id="btn-week" onclick="setView('week')">週</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <button class="nav-tab active" onclick="showSection('calendar', this)">カレンダー</button>
+    <button class="nav-tab" onclick="showSection('routines', this)">ルーティン管理</button>
+    <button class="nav-tab" onclick="showSection('stats', this)">統計</button>
+  </nav>
+
+  <!-- CALENDAR -->
+  <div class="section visible" id="sec-calendar">
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="navCal(-1)">‹</button>
+      <div class="cal-month-label" id="cal-label"></div>
+      <button class="cal-nav-btn" onclick="navCal(1)">›</button>
+    </div>
+    <div id="cal-body"></div>
+  </div>
+
+  <!-- ROUTINES -->
+  <div class="section" id="sec-routines">
+    <div class="routines-grid" id="routines-list"></div>
+    <div class="add-routine-row">
+      <button class="btn btn-primary" onclick="addRoutine()">＋ ルーティンを追加</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="section" id="sec-stats">
+    <div class="stats-grid" id="stats-grid"></div>
+    <div style="margin-bottom:0.8rem">
+      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;">ルーティン別回数</span>
+    </div>
+    <div class="routine-bar-list" id="stats-bars"></div>
+  </div>
+</div>
+
+<!-- LOG MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-date" id="modal-date"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-logs"></div>
+    <div class="modal-section">
+      <span class="modal-label">ルーティンを選択</span>
+      <div class="routine-chips" id="modal-chips"></div>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">メモ（肌の状態など）</span>
+      <textarea class="memo-input" id="modal-memo" placeholder="例：少し乾燥気味、鼻の赤みが落ち着いてきた…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveLog()">記録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- COLOR PICKER -->
+<div class="color-picker-popup" id="color-picker"></div>
+
+<script>
+// ── Palette ──
+const COLORS = [
+  '#7B68EE','#9B7DD4','#C490D1','#D4A0B8','#D4B896',
+  '#7EC8A8','#6BAED6','#5B8DB8','#8B7355','#6B8E6B',
+  '#E88080','#D4826A','#C8A86A','#A0B878','#70B8B8',
+  '#B070B0','#7070C8','#50A878','#C89050','#9090C8'
+];
+
+// ── State ──
+let state = JSON.parse(localStorage.getItem('sk-journal-v1') || 'null') || {
+  routines: [
+    { id: 'r1', name: '休み（回復）',  color: '#7B68EE', steps: '保湿重視' },
+    { id: 'r2', name: 'レチノール',    color: '#C490D1', steps: '乳液→レチ→保湿' },
+    { id: 'r3', name: 'タカミ（鼻）', color: '#6BAED6', steps: '洗顔→タカミ→保湿' },
+  ],
+  logs: {} // { 'YYYY-MM-DD': [{ routineId, memo }] }
+};
+
+function save() { localStorage.setItem('sk-journal-v1', JSON.stringify(state)); }
+
+// ── Date helpers ──
+let today = new Date();
+let curYear = today.getFullYear();
+let curMonth = today.getMonth();
+let curWeekStart = getWeekStart(today);
+let viewMode = 'month';
+
+function yyyymmdd(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getWeekStart(d) {
+  const dt = new Date(d); dt.setDate(dt.getDate() - dt.getDay()); return dt;
+}
+function isSameDay(a,b) { return yyyymmdd(a)===yyyymmdd(b); }
+
+// ── Section nav ──
+function showSection(id, tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('sec-'+id).classList.add('visible');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  if(id==='stats') renderStats();
+}
+
+// ── View mode ──
+function setView(v) {
+  viewMode = v;
+  document.getElementById('btn-month').classList.toggle('active', v==='month');
+  document.getElementById('btn-week').classList.toggle('active', v==='week');
+  renderCal();
+}
+
+// ── Cal nav ──
+function navCal(dir) {
+  if(viewMode==='month') {
+    curMonth += dir;
+    if(curMonth>11){curMonth=0;curYear++;}
+    if(curMonth<0){curMonth=11;curYear--;}
+  } else {
+    curWeekStart = new Date(curWeekStart);
+    curWeekStart.setDate(curWeekStart.getDate() + dir*7);
+  }
+  renderCal();
+}
+
+// ── Render calendar ──
+function renderCal() {
+  if(viewMode==='month') renderMonth();
+  else renderWeek();
+}
+
+const DOW = ['日','月','火','水','木','金','土'];
+
+function renderMonth() {
+  const label = `${curYear}年 ${curMonth+1}月`;
+  document.getElementById('cal-label').textContent = label;
+  const first = new Date(curYear, curMonth, 1);
+  const last  = new Date(curYear, curMonth+1, 0);
+  const startDow = first.getDay();
+
+  let html = '<div class="month-grid">';
+  DOW.forEach((d,i) => html += `<div class="month-dow${i===0?' sun':i===6?' sat':''}">${d}</div>`);
+
+  // blanks
+  for(let i=0;i<startDow;i++) {
+    const d = new Date(curYear, curMonth, -(startDow-1-i));
+    html += dayCell(d, true);
+  }
+  for(let d2=1; d2<=last.getDate(); d2++) {
+    const d = new Date(curYear, curMonth, d2);
+    html += dayCell(d, false);
+  }
+  // trailing
+  const totalCells = startDow + last.getDate();
+  const trail = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for(let i=1;i<=trail;i++) {
+    const d = new Date(curYear, curMonth+1, i);
+    html += dayCell(d, true);
+  }
+
+  html += '</div>';
+  document.getElementById('cal-body').innerHTML = html;
+}
+
+function dayCell(d, other) {
+  const key = yyyymmdd(d);
+  const logs = state.logs[key] || [];
+  const isToday = isSameDay(d, today);
+  let cls = 'month-day';
+  if(other) cls += ' other-month';
+  if(isToday) cls += ' today';
+  if(logs.length>0) cls += ' has-log';
+
+  let dotsHtml = '';
+  if(logs.length > 0) {
+    dotsHtml = '<div class="day-dot-wrap">';
+    logs.forEach(l => {
+      const r = state.routines.find(r=>r.id===l.routineId);
+      if(r) dotsHtml += `<div class="day-dot" style="background:${r.color}"></div>`;
+    });
+    dotsHtml += '</div>';
+    // color bar for first log
+    const r0 = state.routines.find(r=>r.id===logs[0].routineId);
+    if(r0) dotsHtml += `<div class="day-color-bar" style="background:${r0.color}44"></div>`;
+  }
+
+  return `<div class="${cls}" onclick="openModal('${key}')">
+    <div class="day-num">${d.getDate()}</div>
+    ${dotsHtml}
+  </div>`;
+}
+
+function renderWeek() {
+  const ws = new Date(curWeekStart);
+  const we = new Date(ws); we.setDate(we.getDate()+6);
+  const label = `${ws.getMonth()+1}/${ws.getDate()} — ${we.getMonth()+1}/${we.getDate()}`;
+  document.getElementById('cal-label').textContent = label;
+
+  let html = '<div class="week-grid">';
+  // time col header
+  html += '<div></div>';
+  // day headers
+  for(let i=0;i<7;i++) {
+    const d = new Date(ws); d.setDate(d.getDate()+i);
+    const isT = isSameDay(d, today);
+    html += `<div class="week-day-col${isT?' today':''}"><div class="week-day-header">
+      <div class="week-dow">${DOW[d.getDay()]}</div>
+      <div class="week-date">${d.getDate()}</div>
+    </div>`;
+    // single log cell per day
+    const key = yyyymmdd(d);
+    const logs = state.logs[key] || [];
+    let cellStyle = '';
+    let cellContent = '';
+    if(logs.length > 0) {
+      const r = state.routines.find(r=>r.id===logs[0].routineId);
+      if(r) {
+        cellStyle = `background:${r.color}30;border:1px solid ${r.color}60`;
+        cellContent = `<div class="week-cell-label" style="color:${r.color}">${r.name}</div>`;
+        if(logs.length>1) cellContent += `<div style="font-size:0.5rem;color:${r.color}99">+${logs.length-1}</div>`;
+      }
+    }
+    html += `<div class="week-cell has-log" style="${cellStyle}" onclick="openModal('${key}')">
+      <div class="week-cell-inner">${cellContent}</div>
+    </div>`;
+    html += '</div>';
+  }
+  html += '</div>';
+  document.getElementById('cal-body').innerHTML = html;
+}
+
+// ── Modal ──
+let modalDate = null;
+let selectedRoutineId = null;
+
+function openModal(dateKey) {
+  modalDate = dateKey;
+  selectedRoutineId = null;
+  const [y,m,d] = dateKey.split('-');
+  const dt = new Date(Number(y), Number(m)-1, Number(d));
+  document.getElementById('modal-date').textContent = `${dt.getMonth()+1}月${dt.getDate()}日 (${DOW[dt.getDay()]})`;
+
+  renderModalLogs();
+  renderModalChips();
+  document.getElementById('modal-memo').value = '';
+  document.getElementById('overlay').classList.add('open');
+}
+
+function renderModalLogs() {
+  const logs = state.logs[modalDate] || [];
+  let html = '';
+  logs.forEach((l, i) => {
+    const r = state.routines.find(r=>r.id===l.routineId);
+    if(!r) return;
+    html += `<div class="log-display">
+      <div class="log-color-pill" style="background:${r.color}"></div>
+      <div class="log-info">
+        <div class="log-routine-name">${r.name}</div>
+        ${l.memo ? `<div class="log-memo">${l.memo}</div>` : ''}
+      </div>
+      <button class="log-delete" onclick="deleteLog(${i})">✕</button>
+    </div>`;
+  });
+  document.getElementById('modal-logs').innerHTML = html;
+}
+
+function renderModalChips() {
+  let html = '';
+  state.routines.forEach(r => {
+    const isSel = r.id === selectedRoutineId;
+    html += `<div class="routine-chip${isSel?' selected':''}"
+      style="${isSel?`background:${r.color};border-color:${r.color}`:`border-color:${r.color}60;color:${r.color}`}"
+      onclick="selectRoutine('${r.id}')">${r.name}</div>`;
+  });
+  document.getElementById('modal-chips').innerHTML = html;
+}
+
+function selectRoutine(id) {
+  selectedRoutineId = (selectedRoutineId===id) ? null : id;
+  renderModalChips();
+}
+
+function saveLog() {
+  if(!selectedRoutineId) { alert('ルーティンを選んでください'); return; }
+  const memo = document.getElementById('modal-memo').value.trim();
+  if(!state.logs[modalDate]) state.logs[modalDate] = [];
+  state.logs[modalDate].push({ routineId: selectedRoutineId, memo });
+  save(); renderModalLogs();
+  selectedRoutineId = null;
+  document.getElementById('modal-memo').value = '';
+  renderModalChips();
+  renderCal();
+}
+
+function deleteLog(idx) {
+  state.logs[modalDate].splice(idx, 1);
+  if(state.logs[modalDate].length === 0) delete state.logs[modalDate];
+  save(); renderModalLogs(); renderCal();
+}
+
+function closeModal(e) {
+  if(e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+  modalDate = null;
+}
+
+// ── Routines ──
+function stepsToVisual(steps, color) {
+  if (!steps || !steps.trim()) return '<span class="steps-empty">ステップ未設定</span>';
+  const parts = steps.split(/[→>\-]+/).map(s => s.trim()).filter(Boolean);
+  if (parts.length === 0) return '<span class="steps-empty">ステップ未設定</span>';
+  const bg = color + '20';
+  const border = color + '70';
+  return parts.map((p, i) =>
+    (i > 0 ? '<span class="step-arrow-icon">›</span>' : '') +
+    `<span class="step-pill" style="background:${bg};border-color:${border};color:${color}">${p}</span>`
+  ).join('');
+}
+
+function renderRoutines() {
+  let html = '';
+  state.routines.forEach((r) => {
+    html += `<div class="routine-card" id="rr-${r.id}">
+      <div class="routine-card-accent" style="background:${r.color}"></div>
+      <div class="routine-card-header">
+        <div class="routine-color-swatch" style="background:${r.color}" onclick="openColorPicker('${r.id}', this)" title="色を変更"></div>
+        <input class="routine-name-input" value="${r.name}" onchange="updateRoutineAndRefresh('${r.id}','name',this.value)" placeholder="ルーティン名">
+        <button class="btn btn-danger btn-icon" onclick="deleteRoutine('${r.id}')" title="削除" style="padding:4px 8px;font-size:0.75rem;margin-right:0.4rem">✕</button>
+      </div>
+      <div class="routine-card-divider"></div>
+      <div class="routine-steps-area">
+        <div class="steps-label">ステップ内訳</div>
+        <div class="steps-visual" id="steps-visual-${r.id}">${stepsToVisual(r.steps, r.color)}</div>
+        <input class="routine-steps-input"
+          value="${r.steps||''}"
+          onchange="updateRoutineAndRefresh('${r.id}','steps',this.value)"
+          oninput="previewSteps('${r.id}', this.value, '${r.color}')"
+          placeholder="例: 洗顔→タカミ→保湿（→で区切る）">
+      </div>
+    </div>`;
+  });
+  document.getElementById('routines-list').innerHTML = html;
+}
+
+function previewSteps(id, val, color) {
+  const el = document.getElementById('steps-visual-' + id);
+  if (el) el.innerHTML = stepsToVisual(val, color);
+}
+
+function updateRoutineAndRefresh(id, field, val) {
+  const r = state.routines.find(r => r.id === id);
+  if (r) {
+    r[field] = val;
+    save();
+    if (field === 'steps') {
+      const el = document.getElementById('steps-visual-' + id);
+      if (el) el.innerHTML = stepsToVisual(val, r.color);
+    }
+  }
+}
+
+function updateRoutine(id, field, val) {
+  const r = state.routines.find(r=>r.id===id);
+  if(r) { r[field] = val; save(); }
+}
+
+function addRoutine() {
+  const id = 'r' + Date.now();
+  const color = COLORS[Math.floor(Math.random()*COLORS.length)];
+  state.routines.push({ id, name: '新しいルーティン', color, steps: '' });
+  save(); renderRoutines();
+}
+
+function deleteRoutine(id) {
+  if(!confirm('このルーティンを削除しますか？')) return;
+  state.routines = state.routines.filter(r=>r.id!==id);
+  save(); renderRoutines(); renderCal();
+}
+
+// ── Color picker ──
+let pickerTargetId = null;
+function openColorPicker(routineId, el) {
+  pickerTargetId = routineId;
+  const picker = document.getElementById('color-picker');
+  const r = state.routines.find(r=>r.id===routineId);
+  picker.innerHTML = COLORS.map(c =>
+    `<div class="color-option${r&&r.color===c?' selected':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`
+  ).join('');
+  const rect = el.getBoundingClientRect();
+  picker.style.top = (rect.bottom + 6 + window.scrollY) + 'px';
+  picker.style.left = (rect.left + window.scrollX) + 'px';
+  picker.classList.add('open');
+  setTimeout(() => document.addEventListener('click', closePicker, {once:true}), 10);
+}
+function pickColor(c) {
+  const r = state.routines.find(r=>r.id===pickerTargetId);
+  if(r) { r.color = c; save(); renderRoutines(); renderCal(); }
+  document.getElementById('color-picker').classList.remove('open');
+}
+function closePicker(e) {
+  if(!document.getElementById('color-picker').contains(e.target))
+    document.getElementById('color-picker').classList.remove('open');
+}
+
+// ── Stats ──
+function renderStats() {
+  const allLogs = Object.values(state.logs).flat();
+  const totalDays = Object.keys(state.logs).length;
+  const thisMonth = Object.keys(state.logs).filter(k => {
+    const [y,m] = k.split('-');
+    return Number(y)===today.getFullYear() && Number(m)-1===today.getMonth();
+  }).length;
+
+  const counts = {};
+  state.routines.forEach(r => counts[r.id] = 0);
+  allLogs.forEach(l => { if(counts[l.routineId]!==undefined) counts[l.routineId]++; });
+  const maxCount = Math.max(1, ...Object.values(counts));
+
+  const streak = calcStreak();
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--accent2)">${totalDays}</div>
+      <div class="stat-label">総記録日数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#7EC8A8">${thisMonth}</div>
+      <div class="stat-label">今月の記録</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#D4A0B8">${streak}</div>
+      <div class="stat-label">連続記録（日）</div>
+    </div>
+  `;
+
+  let barsHtml = '';
+  state.routines.forEach(r => {
+    const c = counts[r.id] || 0;
+    const pct = (c / maxCount * 100).toFixed(1);
+    barsHtml += `<div class="routine-bar-row">
+      <div class="routine-bar-label">${r.name}</div>
+      <div class="routine-bar-track">
+        <div class="routine-bar-fill" style="width:${pct}%;background:${r.color}"></div>
+      </div>
+      <div class="routine-bar-count">${c}</div>
+    </div>`;
+  });
+  document.getElementById('stats-bars').innerHTML = barsHtml || '<div style="color:var(--muted);font-size:0.75rem">まだ記録がありません</div>';
+}
+
+function calcStreak() {
+  let streak = 0;
+  const d = new Date(today);
+  while(true) {
+    const key = yyyymmdd(d);
+    if(!state.logs[key] || state.logs[key].length === 0) break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+// ── Init ──
+renderCal();
+renderRoutines();
+</script>
+</body>
+</html>
